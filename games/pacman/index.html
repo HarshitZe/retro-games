@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pac‑Man · Retro Games</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #0f0f1a;
+      color: #f0f0f0;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .game-container {
+      background: #1a1a2e;
+      border: 4px solid #4ecdc4;
+      padding: 20px;
+      box-shadow: 0 0 15px rgba(78,205,196,0.3);
+      max-width: 600px;
+      width: 100%;
+      position: relative;
+    }
+    h1 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.5rem;
+      text-align: center;
+      color: #ffe66d;
+      text-shadow: 3px 3px 0 #ff6b9d;
+      margin-bottom: 15px;
+    }
+    .score-board {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      margin-bottom: 10px;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      border: 3px solid #ff6b9d;
+      background: #000;
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 1/1;
+      image-rendering: pixelated;
+    }
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #4ecdc4;
+      border: 2px solid #ffe66d;
+      color: #0f0f1a;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.6rem;
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: 0.2s;
+      min-width: 80px;
+    }
+    button:hover {
+      background: #ff6b9d;
+      border-color: #4ecdc4;
+    }
+    .back-link {
+      margin-top: 20px;
+      font-size: 0.6rem;
+    }
+    .back-link a {
+      color: #ffe66d;
+      text-decoration: none;
+    }
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+    .touch-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      max-width: 200px;
+      margin: 15px auto 0;
+    }
+    .touch-btn {
+      background: #1a1a2e;
+      border: 2px solid #4ecdc4;
+      color: #f0f0f0;
+      font-size: 1.8rem;
+      padding: 10px;
+      cursor: pointer;
+      aspect-ratio: 1/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    .touch-btn:active {
+      background: #ff6b9d;
+    }
+    @media (min-width: 768px) {
+      .touch-controls { display: none; }
+    }
+    .pause-indicator {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ffe66d;
+      color: #0f0f1a;
+      font-size: 0.5rem;
+      padding: 4px 8px;
+      border: 1px solid #ff6b9d;
+      display: none;
+    }
+    .pause-indicator.show { display: block; }
+    .game-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .game-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .overlay-content {
+      background: #1a1a2e;
+      border: 3px solid #ff6b9d;
+      padding: 20px;
+      text-align: center;
+      max-width: 80%;
+    }
+    .overlay-content h2 { color: #ffe66d; font-size: 1rem; margin-bottom: 15px; }
+    .overlay-content p { font-size: 0.7rem; margin-bottom: 20px; color: #f0f0f0; }
+    .overlay-buttons { display: flex; gap: 10px; justify-content: center; }
+    .level-message { font-size: 0.8rem; color: #4ecdc4; margin-bottom: 10px; }
+    .lives { display: flex; justify-content: center; gap: 5px; margin-top: 10px; font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>👻 PAC‑MAN</h1>
+    <div class="score-board">
+      <span>Score: <span id="score">0</span></span>
+      <span>High Score: <span id="highScore">0</span></span>
+    </div>
+    <div class="lives" id="lives">❤️❤️❤️</div>
+    <div class="level-message" id="levelMessage">Level 1</div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <div class="pause-indicator" id="pauseIndicator">PAUSED</div>
+
+    <div class="game-overlay" id="gameOverlay">
+      <div class="overlay-content">
+        <h2 id="overlayTitle">GAME OVER</h2>
+        <p id="overlayMessage">Score: 0</p>
+        <div class="overlay-buttons">
+          <button id="overlayRestart">↻ PLAY AGAIN</button>
+          <button id="overlayNext" style="display: none;">➡️ NEXT LEVEL</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="restartBtn">↻ RESTART</button>
+      <button id="pauseBtn">⏸️ PAUSE</button>
+    </div>
+    <p style="font-size: 0.5rem; color: #b8b8d0; margin-top: 10px;">Arrow keys / Swipe | P pause | Space/Enter start</p>
+
+    <div class="touch-controls">
+      <div></div>
+      <div class="touch-btn" data-dir="up">⬆️</div>
+      <div></div>
+      <div class="touch-btn" data-dir="left">⬅️</div>
+      <div class="touch-btn" data-dir="down">⬇️</div>
+      <div class="touch-btn" data-dir="right">➡️</div>
+    </div>
+
+    <div class="back-link">
+      <a href="/retro-games/">← BACK TO LOBBY</a>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ========== PAC-MAN WITH 3 SEPARATE GHOST IMAGES ==========
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      const scoreSpan = document.getElementById('score');
+      const highScoreSpan = document.getElementById('highScore');
+      const livesSpan = document.getElementById('lives');
+      const levelMessageSpan = document.getElementById('levelMessage');
+      const pauseIndicator = document.getElementById('pauseIndicator');
+      const gameOverlay = document.getElementById('gameOverlay');
+      const overlayTitle = document.getElementById('overlayTitle');
+      const overlayMessage = document.getElementById('overlayMessage');
+      const overlayRestart = document.getElementById('overlayRestart');
+      const overlayNext = document.getElementById('overlayNext');
+
+      // ---------- constants ----------
+      const gridSize = 15;
+      const cellSize = canvas.width / gridSize;
+      const MOVE_INTERVAL = 170; // ms per logic step
+      const GHOST_MOVE_EVERY = 3; // ghosts move speed (low/slow)
+
+      // ---------- load three ghost images ----------
+      const ghostImages = [];
+      const imageUrls = [
+        './img/ghost_blue.png',
+        './img/ghost_green.png',
+        './img/ghost_pink.png'
+      ];
+      let imagesLoaded = 0;
+      let allImagesLoaded = false;
+
+      function loadImage(url, index) {
+        const img = new Image();
+        img.src = url;
+        img.onload = () => {
+          imagesLoaded++;
+          if (imagesLoaded === imageUrls.length) {
+            allImagesLoaded = true;
+            draw(); // redraw with images
+          }
+        };
+        img.onerror = () => {
+          console.warn('Failed to load image:', url);
+          imagesLoaded++; // count as loaded to avoid waiting forever
+          if (imagesLoaded === imageUrls.length) {
+            allImagesLoaded = true; // still consider ready (fallback will be used)
+            draw();
+          }
+        };
+        return img;
+      }
+
+      // Load each image and store
+      for (let i = 0; i < imageUrls.length; i++) {
+        ghostImages.push(loadImage(imageUrls[i], i));
+      }
+
+      // ---------- three mazes (same as before) ----------
+      const mazes = [
+        // Level 1 (original)
+        [
+          [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+          [1,0,1,1,0,1,1,1,1,1,0,1,1,0,1],
+          [1,0,1,0,0,0,0,1,0,0,0,0,1,0,1],
+          [1,0,0,0,1,1,0,0,0,1,1,0,0,0,1],
+          [1,0,1,0,0,1,2,1,2,1,0,0,1,0,1],
+          [1,0,1,1,0,0,0,0,0,0,0,1,1,0,1],
+          [1,0,0,0,0,1,1,0,1,1,0,0,0,0,1],
+          [1,0,1,1,0,0,0,0,0,0,0,1,1,0,1],
+          [1,0,1,0,1,1,0,1,0,1,1,0,1,0,1],
+          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+          [1,0,1,1,1,1,0,1,0,1,1,1,1,0,1],
+          [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
+          [1,0,0,0,1,1,1,0,1,1,1,0,0,0,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ],
+        // Level 2 (more open)
+        [
+          [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,0,0,0,0,0,0,1,0,0,0,0,0,0,1],
+          [1,0,1,1,0,1,0,1,0,1,0,1,1,0,1],
+          [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
+          [1,0,0,0,1,1,1,0,1,1,1,0,0,0,1],
+          [1,0,1,0,0,0,1,2,1,0,0,0,1,0,1],
+          [1,0,1,1,0,1,0,0,0,1,0,1,1,0,1],
+          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+          [1,0,1,1,0,1,0,1,0,1,0,1,1,0,1],
+          [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
+          [1,0,0,0,1,1,1,0,1,1,1,0,0,0,1],
+          [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
+          [1,0,1,1,0,1,1,1,1,1,0,1,1,0,1],
+          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ],
+        // Level 3 (challenging)
+        [
+          [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+          [1,0,1,0,1,0,1,1,1,0,1,0,1,0,1],
+          [1,0,1,0,0,0,1,2,1,0,0,0,1,0,1],
+          [1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
+          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+          [1,0,1,1,1,0,1,0,1,0,1,1,1,0,1],
+          [1,0,1,0,0,0,1,0,1,0,0,0,1,0,1],
+          [1,0,1,0,1,1,1,0,1,1,1,0,1,0,1],
+          [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+          [1,0,1,0,1,0,1,1,1,0,1,0,1,0,1],
+          [1,0,1,0,0,0,1,0,1,0,0,0,1,0,1],
+          [1,0,1,1,1,0,1,0,1,0,1,1,1,0,1],
+          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ]
+      ];
+
+      const TOTAL_LEVELS = mazes.length;
+      let currentLevel = 0;
+      let score = 0;
+      let highScore = localStorage.getItem('pacmanHighScore') || 0;
+      let lives = 3;
+      let gameOver = false;
+      let gameWin = false;
+      let levelComplete = false;
+      let paused = false;
+      let invincible = false;
+      let invincibleTimer = null;
+      let gameRunning = false;
+      let lastMoveTime = 0;
+      let stepCounter = 0;
+      let mouthOpen = true;
+      let animationFrame = null;
+
+      // Pac‑Man and ghosts (3 ghosts with assigned images)
+      let pacman = { x: 7, y: 11, dir: { x: 0, y: 0 }, nextDir: { x: 0, y: 0 } };
+      let ghosts = [
+        { x: 7, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[0] }, // blue
+        { x: 8, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[1] }, // green
+        { x: 6, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[2] }  // pink
+      ];
+
+      let maze = JSON.parse(JSON.stringify(mazes[currentLevel]));
+      let pellets = JSON.parse(JSON.stringify(maze));
+
+      // ---------- helpers ----------
+      function countPellets() {
+        let total = 0;
+        for (let row of pellets) for (let cell of row) if (cell === 0 || cell === 2) total++;
+        return total;
+      }
+
+      function updateLives() { livesSpan.textContent = '❤️'.repeat(lives); }
+      highScoreSpan.textContent = highScore;
+
+      // ---------- drawing ----------
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // draw walls and pellets
+        for (let y = 0; y < gridSize; y++) {
+          for (let x = 0; x < gridSize; x++) {
+            const cell = pellets[y][x];
+            if (cell === 1) { // wall
+              ctx.fillStyle = '#3366cc';
+              ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            } else if (cell === 0) { // pellet
+              ctx.fillStyle = '#ffe66d';
+              ctx.beginPath();
+              ctx.arc(x * cellSize + cellSize/2, y * cellSize + cellSize/2, cellSize/6, 0, 2*Math.PI);
+              ctx.fill();
+            } else if (cell === 2) { // power pellet
+              ctx.fillStyle = '#ff6b9d';
+              ctx.beginPath();
+              ctx.arc(x * cellSize + cellSize/2, y * cellSize + cellSize/2, cellSize/4, 0, 2*Math.PI);
+              ctx.fill();
+            }
+          }
+        }
+
+        // draw ghosts using individual images if loaded, otherwise fallback to circles
+        ghosts.forEach((ghost) => {
+          if (allImagesLoaded && ghost.img && ghost.img.complete && ghost.img.naturalWidth > 0) {
+            ctx.drawImage(
+              ghost.img,
+              ghost.x * cellSize, ghost.y * cellSize, cellSize, cellSize
+            );
+          } else {
+            // Fallback: colored circle (use different colors for distinction)
+            if (ghost === ghosts[0]) ctx.fillStyle = '#4169e1'; // blue
+            else if (ghost === ghosts[1]) ctx.fillStyle = '#2e8b57'; // green
+            else ctx.fillStyle = '#ff69b4'; // pink
+            ctx.beginPath();
+            ctx.arc(ghost.x * cellSize + cellSize/2, ghost.y * cellSize + cellSize/2, cellSize/2.5, 0, 2*Math.PI);
+            ctx.fill();
+            // eyes
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(ghost.x * cellSize + cellSize/3, ghost.y * cellSize + cellSize/3, cellSize/8, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(ghost.x * cellSize + 2*cellSize/3, ghost.y * cellSize + cellSize/3, cellSize/8, 0, 2*Math.PI);
+            ctx.fill();
+          }
+        });
+
+        // draw Pac‑Man with mouth animation
+        ctx.fillStyle = '#ffe66d';
+        const centerX = pacman.x * cellSize + cellSize/2;
+        const centerY = pacman.y * cellSize + cellSize/2;
+        const radius = cellSize/2.2;
+        if (mouthOpen && (pacman.dir.x !== 0 || pacman.dir.y !== 0)) {
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius, 0.2 * Math.PI, 1.8 * Math.PI);
+          ctx.lineTo(centerX, centerY);
+          ctx.fill();
+        } else {
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+      }
+
+      // ---------- movement & collision ----------
+      function isWalkable(x, y) { return pellets[y] && pellets[y][x] !== 1; }
+
+      function movePacman() {
+        if (pacman.nextDir.x !== 0 || pacman.nextDir.y !== 0) {
+          const nextX = pacman.x + pacman.nextDir.x;
+          const nextY = pacman.y + pacman.nextDir.y;
+          if (isWalkable(nextX, nextY)) {
+            pacman.dir = { ...pacman.nextDir };
+          }
+          pacman.nextDir = { x: 0, y: 0 };
+        }
+
+        const newX = pacman.x + pacman.dir.x;
+        const newY = pacman.y + pacman.dir.y;
+        if (isWalkable(newX, newY)) {
+          pacman.x = newX; pacman.y = newY;
+          const cell = pellets[pacman.y][pacman.x];
+          if (cell === 0 || cell === 2) {
+            score += (cell === 2 ? 10 : 1);
+            pellets[pacman.y][pacman.x] = 3;
+            scoreSpan.textContent = score;
+            if (score > highScore) {
+              highScore = score;
+              localStorage.setItem('pacmanHighScore', highScore);
+              highScoreSpan.textContent = highScore;
+            }
+            if (countPellets() === 0) {
+              if (currentLevel < TOTAL_LEVELS - 1) {
+                levelComplete = true;
+                showLevelComplete();
+              } else {
+                gameWin = true;
+                gameOver = true;
+                showGameOver();
+              }
+            }
+          }
+        } else {
+          pacman.dir = { x: 0, y: 0 };
+        }
+      }
+
+      function moveGhost(ghost) {
+        const dirs = [{x:0,y:-1},{x:0,y:1},{x:-1,y:0},{x:1,y:0}];
+        let possible = dirs.filter(d => {
+          const nx = ghost.x + d.x, ny = ghost.y + d.y;
+          return isWalkable(nx, ny) && !(ghost.dir && ghost.dir.x === -d.x && ghost.dir.y === -d.y);
+        });
+        if (possible.length === 0) {
+          possible = dirs.filter(d => isWalkable(ghost.x + d.x, ghost.y + d.y));
+        }
+        if (possible.length > 0) {
+          const newDir = possible[Math.floor(Math.random() * possible.length)];
+          ghost.dir = newDir;
+          ghost.x += newDir.x;
+          ghost.y += newDir.y;
+        }
+      }
+
+      function checkCollision() {
+        if (invincible) return;
+        for (let ghost of ghosts) {
+          if (ghost.x === pacman.x && ghost.y === pacman.y) {
+            lives--;
+            updateLives();
+            if (lives <= 0) {
+              gameOver = true;
+              showGameOver();
+            } else {
+              pacman = { x: 7, y: 11, dir: { x: 0, y: 0 }, nextDir: { x: 0, y: 0 } };
+              ghosts = [
+                { x: 7, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[0] },
+                { x: 8, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[1] },
+                { x: 6, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[2] }
+              ];
+              invincible = true;
+              if (invincibleTimer) clearTimeout(invincibleTimer);
+              invincibleTimer = setTimeout(() => { invincible = false; }, 1500);
+            }
+            break;
+          }
+        }
+      }
+
+      // ---------- game loop ----------
+      function gameLoop(now) {
+        if (!gameRunning) {
+          animationFrame = requestAnimationFrame(gameLoop);
+          return;
+        }
+        if (!paused && !gameOver && !levelComplete) {
+          if (now - lastMoveTime >= MOVE_INTERVAL) {
+            lastMoveTime = now;
+            stepCounter++;
+
+            movePacman();
+
+            if (stepCounter % GHOST_MOVE_EVERY === 0) {
+              if (!gameOver && !levelComplete) {
+                ghosts.forEach(g => moveGhost(g));
+                checkCollision();
+              }
+            }
+
+            if (pacman.dir.x !== 0 || pacman.dir.y !== 0) {
+              mouthOpen = !mouthOpen;
+            } else {
+              mouthOpen = true;
+            }
+          }
+        }
+        draw();
+        animationFrame = requestAnimationFrame(gameLoop);
+      }
+
+      function startGame() {
+        if (gameRunning) return;
+        gameRunning = true;
+        lastMoveTime = performance.now();
+        stepCounter = 0;
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        animationFrame = requestAnimationFrame(gameLoop);
+      }
+
+      function stopGame() {
+        gameRunning = false;
+        if (animationFrame) {
+          cancelAnimationFrame(animationFrame);
+          animationFrame = null;
+        }
+      }
+
+      // ---------- level & overlay management ----------
+      function resetGame() {
+        stopGame();
+        currentLevel = 0;
+        maze = JSON.parse(JSON.stringify(mazes[currentLevel]));
+        pellets = JSON.parse(JSON.stringify(maze));
+        pacman = { x: 7, y: 11, dir: { x: 0, y: 0 }, nextDir: { x: 0, y: 0 } };
+        ghosts = [
+          { x: 7, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[0] },
+          { x: 8, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[1] },
+          { x: 6, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[2] }
+        ];
+        score = 0;
+        lives = 3;
+        gameOver = false;
+        gameWin = false;
+        levelComplete = false;
+        paused = false;
+        invincible = false;
+        if (invincibleTimer) clearTimeout(invincibleTimer);
+        pauseIndicator.classList.remove('show');
+        gameOverlay.classList.remove('show');
+        overlayNext.style.display = 'none';
+        scoreSpan.textContent = score;
+        levelMessageSpan.textContent = `Level ${currentLevel + 1}`;
+        updateLives();
+        draw();
+      }
+
+      function showGameOver() {
+        stopGame();
+        overlayTitle.textContent = gameWin ? '🏆 YOU WIN!' : 'GAME OVER';
+        overlayMessage.textContent = `Score: ${score}`;
+        overlayNext.style.display = 'none';
+        gameOverlay.classList.add('show');
+        draw();
+      }
+
+      function showLevelComplete() {
+        stopGame();
+        overlayTitle.textContent = `✨ LEVEL ${currentLevel + 1} COMPLETE! ✨`;
+        const messages = [
+          "That's impressive, are you ready for this?",
+          "Excellent! Next level awaits!",
+          "You're on fire! Ready for more?"
+        ];
+        overlayMessage.textContent = messages[currentLevel % messages.length];
+        overlayNext.style.display = 'inline-block';
+        gameOverlay.classList.add('show');
+        draw();
+      }
+
+      function nextLevel() {
+        currentLevel++;
+        if (currentLevel >= TOTAL_LEVELS) {
+          gameWin = true;
+          gameOver = true;
+          showGameOver();
+          return;
+        }
+        maze = JSON.parse(JSON.stringify(mazes[currentLevel]));
+        pellets = JSON.parse(JSON.stringify(maze));
+        pacman = { x: 7, y: 11, dir: { x: 0, y: 0 }, nextDir: { x: 0, y: 0 } };
+        ghosts = [
+          { x: 7, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[0] },
+          { x: 8, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[1] },
+          { x: 6, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[2] }
+        ];
+        levelComplete = false;
+        gameOverlay.classList.remove('show');
+        overlayNext.style.display = 'none';
+        levelMessageSpan.textContent = `Level ${currentLevel + 1}`;
+        draw();
+        setTimeout(() => {
+          if (!gameRunning && !gameOver && !levelComplete && !paused) startGame();
+        }, 500);
+      }
+
+      function togglePause() {
+        if (gameOver || levelComplete) return;
+        paused = !paused;
+        pauseIndicator.classList.toggle('show', paused);
+      }
+
+      // ---------- input handling ----------
+      function handleKey(e) {
+        const key = e.key;
+        if (key.startsWith('Arrow')) e.preventDefault();
+
+        if (key === ' ' || key === 'Space' || key === 'Enter') {
+          e.preventDefault();
+          if (!gameRunning && !gameOver && !levelComplete) {
+            startGame();
+          }
+          return;
+        }
+
+        if (gameOver || levelComplete) return;
+        if (key === 'p' || key === 'P') { togglePause(); return; }
+
+        let newDir = null;
+        switch (key) {
+          case 'ArrowUp': newDir = { x: 0, y: -1 }; break;
+          case 'ArrowDown': newDir = { x: 0, y: 1 }; break;
+          case 'ArrowLeft': newDir = { x: -1, y: 0 }; break;
+          case 'ArrowRight': newDir = { x: 1, y: 0 }; break;
+          default: return;
+        }
+        pacman.nextDir = newDir;
+        if (!gameRunning) startGame();
+      }
+
+      function handleTouch(dir) {
+        if (gameOver || levelComplete) return;
+        let newDir = null;
+        switch (dir) {
+          case 'up': newDir = { x: 0, y: -1 }; break;
+          case 'down': newDir = { x: 0, y: 1 }; break;
+          case 'left': newDir = { x: -1, y: 0 }; break;
+          case 'right': newDir = { x: 1, y: 0 }; break;
+          default: return;
+        }
+        pacman.nextDir = newDir;
+        if (!gameRunning) startGame();
+      }
+
+      let touchStartX = 0, touchStartY = 0;
+      function handleTouchStart(e) {
+        e.preventDefault();
+        const t = e.touches[0];
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+      }
+      function handleTouchEnd(e) {
+        e.preventDefault();
+        if (!touchStartX) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - touchStartX;
+        const dy = t.clientY - touchStartY;
+        if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          handleTouch(dx > 0 ? 'right' : 'left');
+        } else {
+          handleTouch(dy > 0 ? 'down' : 'up');
+        }
+        touchStartX = 0;
+      }
+
+      // ---------- event listeners ----------
+      window.addEventListener('keydown', handleKey);
+      document.getElementById('restartBtn').addEventListener('click', resetGame);
+      document.getElementById('pauseBtn').addEventListener('click', togglePause);
+      overlayRestart.addEventListener('click', resetGame);
+      overlayNext.addEventListener('click', nextLevel);
+
+      document.querySelectorAll('.touch-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.preventDefault();
+          const dir = btn.dataset.dir;
+          if (dir) handleTouch(dir);
+        });
+        btn.addEventListener('touchstart', e => {
+          e.preventDefault();
+          const dir = btn.dataset.dir;
+          if (dir) handleTouch(dir);
+        });
+      });
+
+      canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+      canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+      canvas.addEventListener('touchcancel', () => { touchStartX = 0; });
+      canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+      resetGame();
+    })();
+  </script>
+</body>
+</html>
