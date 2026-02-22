@@ -72,7 +72,7 @@ Projects: ESP32 IoT, Power BI dashboards, AI security
 Skills: Python/Rust/JS, Canvas games, GitHub Pages
 
 📞 Connect
-[github.com/HarshitZe]
+[https://github.com/HarshitZe]
 [https://linkedin.com/in/harsh-da]
 
 text
