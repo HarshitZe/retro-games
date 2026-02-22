@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <meta name="description" content="Retro Games - Free open source browser-based classic games: Snake, Pac-Man, Tetris. Join the community!">
+  <meta name="theme-color" content="#0f0f1a">
+  <title>Retro Games · Free Open Source Browser Games</title>
+  <!-- Google Fonts: Press Start 2P -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- PWA manifest -->
+  <link rel="manifest" href="./manifest.json">
+  <!-- Styles -->
+  <link rel="stylesheet" href="./styles.css">
+  <!-- iOS touch icons -->
+  <link rel="apple-touch-icon" href="/retro-games/icons/icon-192.png">
+</head>
+<body>
+  <header>
+    <h1>🕹️ RETRO GAMES</h1>
+    <p class="subhead">Free · Open Source · Browser Based</p>
+  </header>
+
+  <!-- Live Stats Bar -->
+  <div class="live-stats">
+    <span class="stat-item">👥 <span id="onlineCount">47</span> online now</span>
+    <span class="stat-item">🏆 <span id="totalPlayers">1,284</span> total players</span>
+    <span class="stat-item">💬 <span id="chatCount">342</span> messages today</span>
+  </div>
+
+  <!-- Game Grid -->
+  <main class="game-grid">
+    <!-- Snake card -->
+    <div class="game-card-wrapper">
+      <a href="./games/snake/index.html" class="game-card" data-game="snake">
+        <div class="card-icon">🐍</div>
+        <h2>Snake</h2>
+        <p>Classic snake game</p>
+        <span class="now-playing">👥 <span class="player-count">42</span> playing</span>
+        <span class="high-score">🏆 High: 142</span>
+      </a>
+      <button class="save-offline-btn" data-game="snake" title="Save this game for offline play">💾</button>
+    </div>
+
+    <!-- Pac-Man card -->
+    <div class="game-card-wrapper">
+      <a href="./games/pacman/index.html" class="game-card" data-game="pacman">
+        <div class="card-icon">👻</div>
+        <h2>Pac-Man</h2>
+        <p>Eat dots avoid ghosts</p>
+        <span class="now-playing">👥 <span class="player-count">27</span> playing</span>
+        <span class="high-score">🏆 High: 5,280</span>
+      </a>
+      <button class="save-offline-btn" data-game="pacman" title="Save this game for offline play">💾</button>
+    </div>
+
+    <!-- Tetris card -->
+    <div class="game-card-wrapper">
+      <a href="./games/tetris/index.html" class="game-card" data-game="tetris">
+        <div class="card-icon">🧩</div>
+        <h2>Tetris</h2>
+        <p>Stack and clear lines</p>
+        <span class="now-playing">👥 <span class="player-count">38</span> playing</span>
+        <span class="high-score">🏆 High: 12 lines</span>
+      </a>
+      <button class="save-offline-btn" data-game="tetris" title="Save this game for offline play">💾</button>
+    </div>
+  </main>
+
+  <!-- Two-Column Community Hub -->
+  <section class="community-hub">
+    <!-- Leaderboard Column -->
+    <div class="hub-column">
+      <h2>🏆 Leaderboards</h2>
+      <div class="leaderboard-tabs">
+        <button class="leaderboard-tab active" data-game="snake">🐍 Snake</button>
+        <button class="leaderboard-tab" data-game="pacman">👻 Pac-Man</button>
+        <button class="leaderboard-tab" data-game="tetris">🧩 Tetris</button>
+      </div>
+      <div class="leaderboard-content" id="leaderboardSnake">
+        <ol>
+          <li>Alex · 142</li>
+          <li>Taylor · 138</li>
+          <li>Sam · 135</li>
+        </ol>
+      </div>
+      <div class="leaderboard-content hidden" id="leaderboardPacman">
+        <ol>
+          <li>Jamie · 5,280</li>
+          <li>Chris · 4,950</li>
+          <li>Pat · 4,720</li>
+        </ol>
+      </div>
+      <div class="leaderboard-content hidden" id="leaderboardTetris">
+        <ol>
+          <li>Jordan · 12 lines</li>
+          <li>Casey · 10 lines</li>
+          <li>Riley · 9 lines</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Daily Rewards Column -->
+    <div class="hub-column">
+      <h2>🔥 Daily Rewards</h2>
+      <div class="daily-challenge" id="dailyChallenge">
+        <p class="challenge-text">Check in today to earn a retro badge!</p>
+        <button id="checkinBtn" class="checkin-button">📅 CHECK IN</button>
+        <p class="streak-text">Current streak: <span id="streakCount">0</span> days</p>
+        <div class="badge-collection" id="badgeCollection">
+          <span class="badge" title="First login">🎮</span>
+          <span class="badge locked" title="Play 3 games">🔒</span>
+          <span class="badge locked" title="Score 100 in Snake">🔒</span>
+          <span class="badge locked" title="7-day streak">🔒</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Community Shoutbox with Reactions -->
+  <section class="community-shoutbox">
+    <h2>📢 Community Shoutbox <span class="shoutbox-live">LIVE</span></h2>
+    <div class="shoutbox-messages" id="shoutboxMessages">
+      <!-- Messages dynamically inserted by JS -->
+    </div>
+    <form class="shoutbox-form" id="shoutboxForm">
+      <input type="text" id="shoutName" placeholder="Your name" maxlength="20" required>
+      <input type="text" id="shoutMessage" placeholder="Your message" maxlength="100" required>
+      <button type="submit">📢 Shout</button>
+    </form>
+  </section>
+
+  <!-- Bottom Row: Retro Radio & Activity Feed -->
+  <div class="bottom-row">
+    <!-- Retro Radio -->
+    <div class="retro-radio">
+      <h3>📻 Retro Radio</h3>
+      <div class="radio-player">
+        <button id="radioPlayPause">▶️ Play</button>
+        <span id="radioTrack">8-bit Anthem</span>
+        <input type="range" id="radioVolume" min="0" max="1" step="0.1" value="0.5">
+      </div>
+      <div class="track-list">
+        <span class="track">🔊 8-bit Anthem</span>
+        <span class="track">🎵 Chip Tune</span>
+        <span class="track">🎶 Arcade Fever</span>
+      </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="activity-feed">
+      <h3>📡 Live Activity</h3>
+      <div id="activityFeed">
+        <!-- Activities inserted by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Game of the Week Poll -->
+  <div class="poll-container">
+    <h3>🗳️ Game of the Week</h3>
+    <p>Vote for which game we should add next!</p>
+    <div class="poll-options" id="pollOptions">
+      <!-- Populated by JS -->
+    </div>
+    <button id="voteBtn">Vote</button>
+    <p id="voteMessage" class="vote-message"></p>
+  </div>
+
+  <!-- Visitor Counter & Game Tip -->
+  <div class="visitor-tip-row">
+    <div class="visitor-counter">
+      <span>👾 VISITOR COUNT: </span>
+      <span id="visitorCount">1337</span>
+    </div>
+    <div class="game-tip" id="gameTip">
+      💡 Tip: Use arrow keys in Snake
+    </div>
+  </div>
+
+  <!-- GitHub Button -->
+  <div class="github-button-container">
+    <a href="https://github.com/HarshitZe/retro-games" class="github-button" target="_blank" rel="noopener">⭐ Star on GitHub</a>
+  </div>
+
+  <!-- Footer with Community Links -->
+  <footer>
+    <p>Open Source — Add your own game</p>
+    <p class="social-links">
+      <a href="#">💬 Discord</a> · 
+      <a href="#">🐦 Twitter</a> · 
+      <a href="#">📧 Newsletter</a> ·
+      <a href="#" id="pollLink">🗳️ Vote for next game</a> ·
+      <a href="#" id="reportBugLink">🐞 Report bug</a>
+    </p>
+  </footer>
+
+  <!-- Hidden Poll Modal -->
+  <div id="pollModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h3>Which game should we add next?</h3>
+      <form id="pollForm">
+        <!-- Radio options injected by JS -->
+        <button type="submit">Vote</button>
+        <button type="button" id="closePoll">Close</button>
+      </form>
+      <div class="poll-results" id="pollResults"></div>
+    </div>
+  </div>
+
+  <!-- Hidden Bug Report Modal -->
+  <div id="bugModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h3>Report a bug</h3>
+      <form id="bugForm">
+        <input type="text" id="bugName" placeholder="Your name" required>
+        <textarea id="bugDescription" placeholder="Describe the bug..." rows="4" required></textarea>
+        <button type="submit">Submit</button>
+        <button type="button" id="closeBugModal">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main JavaScript-->
+  <script src="./main.js" defer></script>
+</body>
+</html>
