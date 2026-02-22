@@ -28,7 +28,7 @@ Snake UI
 
 Tetris UI
 
-GitHub Pages: Live at HarshitZe.github.io/retro-games
+GitHub Pages: Live at https://HarshitZe.github.io/retro-games
 
 🛠️ Tech Stack
 text
