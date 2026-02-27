@@ -446,6 +446,7 @@
       let levelComplete = false;
       let paused = false;
       let invincible = false;
+      let intermissionAudio = null;
       let invincibleTimer = null;
       let gameRunning = false;
       let lastMoveTime = 0;
@@ -661,6 +662,7 @@
             if (lives <= 0) {
               gameOver = true;
               showGameOver();
+              playSound(sounds.gameOver);
             } else {
               pacman = { x: 7, y: 11, dir: { x: 0, y: 0 }, nextDir: { x: 0, y: 0 } };
               ghosts = [
@@ -764,7 +766,7 @@
         levelMessageSpan.textContent = `Level ${currentLevel + 1}`;
         updateLives();
         draw();
-        playSound(sounds.intermission);
+        playSound(sounds.lifeLost);
       }
 
       function showGameOver() {
@@ -820,6 +822,20 @@
         if (gameOver || levelComplete) return;
         paused = !paused;
         pauseIndicator.classList.toggle('show', paused);
+        if (paused) {
+          if (soundsEnabled && sounds.intermission && !intermissionAudio) {
+            intermissionAudio = new Audio(sounds.intermission.src);
+            intermissionAudio.volume = 0.2;
+            intermissionAudio.loop = true;
+            intermissionAudio.play().catch(() => {});
+          }
+        } else {
+          if (intermissionAudio) {
+            intermissionAudio.pause();
+            intermissionAudio.currentTime = 0;
+            intermissionAudio = null;
+          }
+        }
       }
 
       // ----------input handling ----------
