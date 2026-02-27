@@ -1226,6 +1226,7 @@ footer::after {
   font-size: 0.8rem;
   min-height: var(--touch-target);
   -webkit-appearance: none;
+  appearance: none;  
   border-radius: 0;
 }
 
