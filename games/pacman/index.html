@@ -482,12 +482,7 @@
         // draw Pac‑Man with mouth animation
         const pacDrawX = pacmanPrev.x + (pacman.x - pacmanPrev.x) * t;
         const pacDrawY = pacmanPrev.y + (pacman.y - pacmanPrev.y) * t;
-        if (invincible) {
-          const blink = Math.floor(Date.now() / 200) % 2 === 0;
-          ctx.fillStyle = blink ? '#ffffff' : '#ffe66d';
-        } else {
-          ctx.fillStyle = '#ffe66d';
-        }
+
         ctx.fillStyle = '#ffe66d';
         const centerX = pacDrawX * cellSize + cellSize/2;
         const centerY = pacDrawY * cellSize + cellSize/2;
@@ -508,6 +503,12 @@
           ctx.beginPath();
           ctx.arc(centerX, centerY, radius + 2, 0, 2 * Math.PI);
           ctx.stroke();
+        }
+        if (invincible) {
+          const blink = Math.floor(Date.now() / 200) % 2 === 0;
+          ctx.fillStyle = blink ? '#ffffff' : '#ffe66d';
+        } else {
+          ctx.fillStyle = '#ffe66d';
         }
       }
 
@@ -602,6 +603,8 @@
                 { x: 8, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[1] },
                 { x: 6, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[2] }
               ];
+              pacmanPrev = { x: pacman.x, y: pacman.y };
+              ghostsPrev = ghosts.map(g => ({ x: g.x, y: g.y }));
               invincible = true;
               if (invincibleTimer) clearTimeout(invincibleTimer);
               invincibleTimer = setTimeout(() => { invincible = false; }, 1500);
@@ -630,9 +633,9 @@
             if (stepCounter % GHOST_MOVE_EVERY === 0) {
               if (!gameOver && !levelComplete) {
                 ghosts.forEach(g => moveGhost(g));
-                checkCollision();
               }
             }
+            checkCollision();
 
             if (pacman.dir.x !== 0 || pacman.dir.y !== 0) {
               mouthOpen = !mouthOpen;
