@@ -764,6 +764,10 @@
         overlayNext.style.display = 'none';
         scoreSpan.textContent = score;
         levelMessageSpan.textContent = `Level ${currentLevel + 1}`;
+        if (intermissionAudio) {
+          intermissionAudio.pause();
+          intermissionAudio = null
+        }
         updateLives();
         draw();
         playSound(sounds.lifeLost);
@@ -771,6 +775,10 @@
 
       function showGameOver() {
         stopGame();
+        if (intermissionAudio) {
+          intermissionAudio.pause();
+          intermissionAudio = null;
+        }
         overlayTitle.textContent = gameWin ? '🏆 YOU WIN!' : 'GAME OVER';
         overlayMessage.textContent = `Score: ${score}`;
         overlayNext.style.display = 'none';
@@ -780,11 +788,15 @@
 
       function showLevelComplete() {
         stopGame();
+        if (intermissionAudio) {
+          intermissionAudio.pause();
+          intermissionAudio = null;
+        }
         overlayTitle.textContent = `✨ LEVEL ${currentLevel + 1} COMPLETE! ✨`;
         const messages = [
-          "That's impressive, are you ready for this?",
-          "Excellent! Next level awaits!",
-          "You're on fire! Ready for more?"
+          "SHeeshhh this was the hardest ",
+          "You've got skills noice",
+          "Are you obsessed with this gamee?"
         ];
         overlayMessage.textContent = messages[currentLevel % messages.length];
         overlayNext.style.display = 'inline-block';
@@ -825,7 +837,7 @@
         if (paused) {
           if (soundsEnabled && sounds.intermission && !intermissionAudio) {
             intermissionAudio = new Audio(sounds.intermission.src);
-            intermissionAudio.volume = 0.2;
+            intermissionAudio.volume = 0.1;
             intermissionAudio.loop = true;
             intermissionAudio.play().catch(() => {});
           }
