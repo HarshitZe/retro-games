@@ -71,9 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     leaderboards: {
-      snake: ['Alex:142', 'Taylor:138', 'Sam:135'],
-      pacman: ['Jamie:5280', 'Chris:4950', 'Pat:4720'],
-      tetris: ['Jordan:12', 'Casey:10', 'Riley:9']
+      snake: ['Sasta hulkkk :142', 'chota bada baccha :138', 'murgi :135'],
+      pacman: ['sasta hulk :5280', 'bada baccha :4950', 'paneer :4720'],
+      tetris: ['bada sasta hulk :12', 'chota baccha :10', 'rasmalai :9']
     },
     gameCounts: { snake: 42, pacman: 27, tetris: 38 },
     offlineGames: [] // list of game names saved offline
