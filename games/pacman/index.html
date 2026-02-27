@@ -315,6 +315,7 @@
         if (Array.isArray(sound)) {
           audioToPlay = sound[lifeLostIndex];
           lifeLostIndex = (lifeLostIndex + 1) % sound.length;
+          isLifeLost = true;
         } else {
           audioToPlay = sound;
         }
