@@ -126,6 +126,13 @@
       box-shadow: inset -2px -2px 0 #8b0000, inset 2px 2px 0 #ff6b6b, 0 2px 0 #4a4a4a;
       animation: none;
     }
+    .touch-btn img {
+      width: 60%;
+      height: 60%;
+      object-fit: contain;
+      image-rendering: pixelated;
+      pointer-events: none;
+    }
 
     @media (min-width: 768px) {
       .touch-controls { display: none; }
@@ -222,17 +229,17 @@
     <div class="touch-controls">
       <div></div>
       <div class="touch-btn" data-dir="up">
-        <img src="../../assets/button_up.png" alt ="up" draggable="false"/>
+        <img src="../../assets/button_up.png" alt ="Up" draggable="false"/>
       </div>
       <div></div>
       <div class="touch-btn" data-dir="left">
-        <img src="../../assets/button_left.png" alt="left" draggable="false"/>
+        <img src="../../assets/button_left.png" alt="Left" draggable="false"/>
       </div>
       <div class="touch-btn" data-dir="down">
-        <img src="../../assets/button_down.png" alt="down" draggable="false"/>
+        <img src="../../assets/button_down.png" alt="Down" draggable="false"/>
       </div>
       <div class="touch-btn" data-dir="right">
-        <img src="../../assets/button_right.png" alt="right" draggable="false/>"/>
+        <img src="../../assets/button_right.png" alt="Right" draggable="false/>"/>
       </div>
     </div>
 
