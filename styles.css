@@ -720,6 +720,7 @@ header h1 {
   transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   min-height: var(--touch-target);
   -webkit-appearance: none;
+  appearance: none;  
   border-radius: 0;
 }
 
