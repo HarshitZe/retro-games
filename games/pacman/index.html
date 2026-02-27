@@ -264,11 +264,16 @@
         //----overlapping playback
         const clone = new Audio(audioToPlay.src);
         if (audioToPlay === sounds.powerPellet) {
-          clone.volume = 0.3;   // power pellet
-          } else if (audioToPlay === sounds.pellet) {
+          clone.volume = 0.2;   // power pellet
+          } 
+        else if (audioToPlay === sounds.pellet) {
             clone.volume = 0.4;   // normal pellet
-            } else {
-              clone.volume = 0.5;   // all other sounds
+            }
+        else if (audioToPlay === sounds.lifeLost) {
+            clone.volume = 1.0;   // normal pellet
+            }
+        else {
+              clone.volume = 0.4;   // all other sounds
               }
               clone.play();
             }
