@@ -196,13 +196,13 @@
     </div>
 
     <div class="back-link">
-      <a href="/retro-games/">← BACK TO LOBBY</a>
+      <a href="../../index.html">← BACK TO LOBBY</a>
     </div>
   </div>
 
   <script>
     (function() {
-      // ========== PAC-MAN WITH 3 SEPARATE GHOST IMAGES ==========
+      //PAC-MAN WITH 3 SEPARATE GHOST IMAGES
       const canvas = document.getElementById('gameCanvas');
       const ctx = canvas.getContext('2d');
       const scoreSpan = document.getElementById('score');
@@ -216,13 +216,58 @@
       const overlayRestart = document.getElementById('overlayRestart');
       const overlayNext = document.getElementById('overlayNext');
 
-      // ---------- constants ----------
+
+
+      //--------------- constants ----------
       const gridSize = 15;
       const cellSize = canvas.width / gridSize;
       const MOVE_INTERVAL = 170; // ms per logic step
       const GHOST_MOVE_EVERY = 3; // ghosts move speed (low/slow)
 
-      // ---------- load three ghost images ----------
+
+      // -----sound effects 
+      let soundsEnabled = false;
+      let lifeLostIndex = 0; //sequential
+
+      const sounds = {
+        pellet: new Audio('/retro-games/sounds/pellet_eat.mp3'),
+        powerPellet: new Audio('/retro-games/sounds/power_pellet_eat.wav'),
+        lifeLost: [
+          new Audio('/retro-games/sounds/life_lost_1.ogg'),
+          new Audio('/retro-games/sounds/life_lost_2.ogg'),
+          new Audio('/retro-games/sounds/life_lost_3.ogg')
+        ],
+        levelComplete: new Audio('/retro-games/sounds/level_complete.ogg'),
+        gameOver: new Audio('/retro-games/sounds/game_over.ogg'),
+        intermission: new Audio('/retro-games/sounds/intermission.mid')
+      };
+
+      //preload sounds
+      Object.values(sounds).forEach(sound => {
+        if (Array.isArray(sound)) {
+          sound.forEach(s => s.load());
+        } else {
+          sound.load();
+        }
+      });
+
+      //play sound (sequential rotation)
+      function playSound(sound) {
+        if (!soundsEnabled) return;
+        let audioToPlay;
+        if (Array.isArray(sound)) {
+          audioToPlay = sound[lifeLostIndex];
+          lifeLostIndex = (lifeLostIndex + 1) % sound.length;
+        } else {
+          audioToPlay = sound;
+        }
+        //----overlapping playback
+        const clone = new Audio(audioToPlay.src);
+        clone.volume = 0.5;
+        clone.play();
+      }
+
+      // ------------------ load three ghost images ----------
       const ghostImages = [];
       const imageUrls = [
         './img/ghost_blue.png',
@@ -253,12 +298,14 @@
         return img;
       }
 
+
       // Load each image and store
       for (let i = 0; i < imageUrls.length; i++) {
         ghostImages.push(loadImage(imageUrls[i], i));
       }
 
-      // ---------- three mazes (same as before) ----------
+
+      // ------------- three mazes  ----------
       const mazes = [
         // Level 1 (original)
         [
@@ -333,6 +380,7 @@
       let mouthOpen = true;
       let animationFrame = null;
 
+
       // Pac‑Man and ghosts (3 ghosts with assigned images)
       let pacman = { x: 7, y: 11, dir: { x: 0, y: 0 }, nextDir: { x: 0, y: 0 } };
       let ghosts = [
@@ -344,7 +392,8 @@
       let maze = JSON.parse(JSON.stringify(mazes[currentLevel]));
       let pellets = JSON.parse(JSON.stringify(maze));
 
-      // ---------- helpers ----------
+
+      // ------------- helpers ----------
       function countPellets() {
         let total = 0;
         for (let row of pellets) for (let cell of row) if (cell === 0 || cell === 2) total++;
@@ -354,9 +403,10 @@
       function updateLives() { livesSpan.textContent = '❤️'.repeat(lives); }
       highScoreSpan.textContent = highScore;
 
-      // ---------- drawing ----------
+      // -------------- drawing ----------
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
 
         // draw walls and pellets
         for (let y = 0; y < gridSize; y++) {
@@ -379,6 +429,7 @@
           }
         }
 
+
         // draw ghosts using individual images if loaded, otherwise fallback to circles
         ghosts.forEach((ghost) => {
           if (allImagesLoaded && ghost.img && ghost.img.complete && ghost.img.naturalWidth > 0) {
@@ -386,6 +437,8 @@
               ghost.img,
               ghost.x * cellSize, ghost.y * cellSize, cellSize, cellSize
             );
+
+
           } else {
             // Fallback: colored circle (use different colors for distinction)
             if (ghost === ghosts[0]) ctx.fillStyle = '#4169e1'; // blue
@@ -422,7 +475,7 @@
         }
       }
 
-      // ---------- movement & collision ----------
+      // ------------ movement & collision 
       function isWalkable(x, y) { return pellets[y] && pellets[y][x] !== 1; }
 
       function movePacman() {
@@ -444,6 +497,13 @@
             score += (cell === 2 ? 10 : 1);
             pellets[pacman.y][pacman.x] = 3;
             scoreSpan.textContent = score;
+
+            if (cell === 2) {
+              playSound(sounds.powerPellet);
+            } else {
+              playSound(sounds.pellet);
+            }
+            
             if (score > highScore) {
               highScore = score;
               localStorage.setItem('pacmanHighScore', highScore);
@@ -453,10 +513,12 @@
               if (currentLevel < TOTAL_LEVELS - 1) {
                 levelComplete = true;
                 showLevelComplete();
+                playSound(sounds.levelComplete);
               } else {
                 gameWin = true;
                 gameOver = true;
                 showGameOver();
+                playSound(sounds.gameOver);
               }
             }
           }
@@ -487,6 +549,7 @@
         for (let ghost of ghosts) {
           if (ghost.x === pacman.x && ghost.y === pacman.y) {
             lives--;
+            playSound(sounds.lifeLost);
             updateLives();
             if (lives <= 0) {
               gameOver = true;
@@ -582,6 +645,7 @@
         levelMessageSpan.textContent = `Level ${currentLevel + 1}`;
         updateLives();
         draw();
+        playSound(sounds.intermission);
       }
 
       function showGameOver() {
@@ -639,7 +703,7 @@
         pauseIndicator.classList.toggle('show', paused);
       }
 
-      // ---------- input handling ----------
+      // ----------input handling ----------
       function handleKey(e) {
         const key = e.key;
         if (key.startsWith('Arrow')) e.preventDefault();
@@ -652,17 +716,37 @@
           return;
         }
 
+        //sounds
+        if (!soundsEnabled) soundsEnabled = true;
+
         if (gameOver || levelComplete) return;
         if (key === 'p' || key === 'P') { togglePause(); return; }
-
+        
         let newDir = null;
         switch (key) {
-          case 'ArrowUp': newDir = { x: 0, y: -1 }; break;
-          case 'ArrowDown': newDir = { x: 0, y: 1 }; break;
-          case 'ArrowLeft': newDir = { x: -1, y: 0 }; break;
-          case 'ArrowRight': newDir = { x: 1, y: 0 }; break;
-          default: return;
-        }
+          case 'ArrowUp':
+          case 'W':
+          case 'w':
+            newDir = { x: 0, y: -1 };
+            break;
+          case 'ArrowDown':
+          case 'S':
+          case 's':
+            newDir = { x: 0, y: 1 };
+            break;
+          case 'ArrowLeft':
+          case 'A':
+          case 'a':
+            newDir = { x: -1, y: 0 };
+            break;
+          case 'ArrowRight':
+          case 'D':
+          case 'd':
+            newDir = { x: 1, y: 0 };
+            break;
+          default:
+            return;
+      }
         pacman.nextDir = newDir;
         if (!gameRunning) startGame();
       }
