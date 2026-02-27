@@ -390,15 +390,17 @@
       let stepCounter = 0;
       let mouthOpen = true;
       let animationFrame = null;
-
-
-      // Pac‑Man and ghosts (3 ghosts with assigned images)
       let pacman = { x: 7, y: 11, dir: { x: 0, y: 0 }, nextDir: { x: 0, y: 0 } };
       let ghosts = [
         { x: 7, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[0] }, // blue
         { x: 8, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[1] }, // green
         { x: 6, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[2] }  // pink
       ];
+      let pacmanPrev = { x: pacman.x, y: pacman.y };
+      let ghostsPrev = ghosts.map(g => ({ x: g.x, y: g.y }));
+
+
+      //pac‑Man and ghosts (3 ghosts with assigned images)
 
       let maze = JSON.parse(JSON.stringify(mazes[currentLevel]));
       let pellets = JSON.parse(JSON.stringify(maze));
@@ -418,6 +420,8 @@
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        const now = performance.now();
+        const t = Math.min((now - lastMoveTime) / MOVE_INTERVAL, 1);
 
         // draw walls and pellets
         for (let y = 0; y < gridSize; y++) {
@@ -442,37 +446,37 @@
 
 
         // draw ghosts using individual images if loaded, otherwise fallback to circles
-        ghosts.forEach((ghost) => {
-          if (allImagesLoaded && ghost.img && ghost.img.complete && ghost.img.naturalWidth > 0) {
-            ctx.drawImage(
-              ghost.img,
-              ghost.x * cellSize, ghost.y * cellSize, cellSize, cellSize
-            );
-
-
+        ghosts.forEach((ghost, i) => {
+          const prev = ghostsPrev[i] || ghost;
+          const drawX = prev.x + (ghost.x - prev.x) * t;
+          const drawY = prev.y + (ghost.y - prev.y) * t;
+          
+          if (allImagesLoaded && ghost.img) {
+            ctx.drawImage(ghost.img, drawX * cellSize, drawY * cellSize, cellSize, cellSize);
           } else {
-            // Fallback: colored circle (use different colors for distinction)
-            if (ghost === ghosts[0]) ctx.fillStyle = '#4169e1'; // blue
-            else if (ghost === ghosts[1]) ctx.fillStyle = '#2e8b57'; // green
-            else ctx.fillStyle = '#ff69b4'; // pink
+            
+            //fallback drawing (use drawX, drawY)
+            ctx.fillStyle = '#ff6b9d';
             ctx.beginPath();
-            ctx.arc(ghost.x * cellSize + cellSize/2, ghost.y * cellSize + cellSize/2, cellSize/2.5, 0, 2*Math.PI);
+            ctx.arc(drawX * cellSize + cellSize/2, drawY * cellSize + cellSize/2, cellSize/2.5, 0, 2*Math.PI);
             ctx.fill();
             // eyes
             ctx.fillStyle = '#fff';
             ctx.beginPath();
-            ctx.arc(ghost.x * cellSize + cellSize/3, ghost.y * cellSize + cellSize/3, cellSize/8, 0, 2*Math.PI);
+            ctx.arc(drawX * cellSize + cellSize/3, drawY * cellSize + cellSize/3, cellSize/8, 0, 2*Math.PI);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(ghost.x * cellSize + 2*cellSize/3, ghost.y * cellSize + cellSize/3, cellSize/8, 0, 2*Math.PI);
+            ctx.arc(drawX * cellSize + 2*cellSize/3, drawY * cellSize + cellSize/3, cellSize/8, 0, 2*Math.PI);
             ctx.fill();
           }
         });
 
         // draw Pac‑Man with mouth animation
+        const pacDrawX = pacmanPrev.x + (pacman.x - pacmanPrev.x) * t;
+        const pacDrawY = pacmanPrev.y + (pacman.y - pacmanPrev.y) * t;
         ctx.fillStyle = '#ffe66d';
-        const centerX = pacman.x * cellSize + cellSize/2;
-        const centerY = pacman.y * cellSize + cellSize/2;
+        const centerX = pacDrawX * cellSize + cellSize/2;
+        const centerY = pacDrawY * cellSize + cellSize/2;
         const radius = cellSize/2.2;
         if (mouthOpen && (pacman.dir.x !== 0 || pacman.dir.y !== 0)) {
           ctx.beginPath();
@@ -482,7 +486,7 @@
         } else {
           ctx.beginPath();
           ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-          ctx.fill();
+         ctx.fill();
         }
       }
 
@@ -589,6 +593,9 @@
         }
         if (!paused && !gameOver && !levelComplete) {
           if (now - lastMoveTime >= MOVE_INTERVAL) {
+            pacmanPrev = { x: pacman.x, y: pacman.y };
+            ghostsPrev = ghosts.map(g => ({ x: g.x, y: g.y }));
+
             lastMoveTime = now;
             stepCounter++;
 
@@ -635,12 +642,19 @@
         currentLevel = 0;
         maze = JSON.parse(JSON.stringify(mazes[currentLevel]));
         pellets = JSON.parse(JSON.stringify(maze));
+        //pacman
         pacman = { x: 7, y: 11, dir: { x: 0, y: 0 }, nextDir: { x: 0, y: 0 } };
+        //ghost
         ghosts = [
           { x: 7, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[0] },
           { x: 8, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[1] },
           { x: 6, y: 7, dir: { x: 0, y: 0 }, img: ghostImages[2] }
         ];
+
+        pacmanPrev = { x: pacman.x, y: pacman.y };
+        ghostsPrev = ghosts.map(g => ({ x: g.x, y: g.y }));
+        lastMoveTime = performance.now(); 
+
         score = 0;
         lives = 3;
         gameOver = false;
