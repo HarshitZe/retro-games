@@ -230,16 +230,16 @@
       let lifeLostIndex = 0; //sequential
 
       const sounds = {
-        pellet: new Audio('/games/pacman/sounds/pellet_eat.mp3'),
-        powerPellet: new Audio('/games/pacman/sounds/power_pellet_eat.wav'),
+        pellet: new Audio('./sounds/pellet_eat.mp3'),
+        powerPellet: new Audio('./sounds/power_pellet_eat.wav'),
         lifeLost: [
-          new Audio('/games/pacman/sounds/life_lost_1.ogg'),
-          new Audio('/games/pacman/sounds/life_lost_2.ogg'),
-          new Audio('/games/pacman/sounds/life_lost_3.ogg')
+          new Audio('./sounds/life_lost_1.ogg'),
+          new Audio('./sounds/life_lost_2.ogg'),
+          new Audio('./sounds/life_lost_3.ogg')
         ],
-        levelComplete: new Audio('/games/pacman/sounds/level_complete.ogg'),
-        gameOver: new Audio('/games/pacman/sounds/game_over.ogg'),
-        intermission: new Audio('/games/pacman/sounds/intermission.mid')
+        levelComplete: new Audio('./sounds/level_complete.ogg'),
+        gameOver: new Audio('./sounds/game_over.ogg'),
+        intermission: new Audio('./sounds/intermission.mid')
       };
 
       //preload sounds
