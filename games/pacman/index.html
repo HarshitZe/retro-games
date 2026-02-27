@@ -278,6 +278,13 @@
       // -----sound effects 
       let soundsEnabled = false;
       let lifeLostIndex = 0; //sequential
+      function enableSounds() {
+        if (!soundsEnabled) {
+          soundsEnabled = true;
+          const silent = new Audio('data:audio/wav;base64,UklGRlwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVgAAABhYm9vdHRib3Bz');
+          silent.play().catch(() => {});
+        }
+      }
 
       const sounds = {
         pellet: new Audio('./sounds/pellet_eat.mp3'),
@@ -892,20 +899,37 @@
       }
 
       // ---------- event listeners ----------
-      window.addEventListener('keydown', handleKey);
-      document.getElementById('restartBtn').addEventListener('click', resetGame);
-      document.getElementById('pauseBtn').addEventListener('click', togglePause);
-      overlayRestart.addEventListener('click', resetGame);
-      overlayNext.addEventListener('click', nextLevel);
+      window.addEventListener('keydown',(e)=>{
+        enableSounds();
+        handleKey(e);
+      }); 
+      document.getElementById('restartBtn').addEventListener('click',(e)=>{
+        enableSounds();
+        resetGame();
+      });
+      document.getElementById('pauseBtn').addEventListener('click',(e)=>{
+        enableSounds();
+        togglePause();
+      });
+      overlayRestart.addEventListener('click',(e)=>{
+        enableSounds();
+        resetGame();
+      });
+      overlayNext.addEventListener('click',(e)=>{
+        enableSounds();
+        nextLevel();
+      });
 
       document.querySelectorAll('.touch-btn').forEach(btn => {
         btn.addEventListener('click', e => {
           e.preventDefault();
+          enableSounds();
           const dir = btn.dataset.dir;
           if (dir) handleTouch(dir);
         });
         btn.addEventListener('touchstart', e => {
           e.preventDefault();
+          enableSounds();
           const dir = btn.dataset.dir;
           if (dir) handleTouch(dir);
         });
